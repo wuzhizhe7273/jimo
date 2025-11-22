@@ -1,17 +1,28 @@
 [workspace]
 resolver = "3"
-members = ["jimo-conf", "jimo-ctx", "jimo-data", "jimo-plugin","jimo-server"]
+members = ["jimo-conf", "jimo-ctx", "jimo-data", "jimo-plugin", "jimo-plugin-pdk","jimo-server"]
 [workspace.dependencies]
 anyhow={version = "1.0.100"}
 typedmap={version = "0.6.0"}
 async-trait={version = "0.1.89"}
 axum={version = "0.8.6"}
+dashmap={version="6.1.0"}
 figment={version = "0.10.19"}
 thiserror={version = "2.0.17"}
-tokio={version = "1.47.1"}
+tokio={version = "1.48.0"}
 serde={version = "1.0.228"}
 serde_json={version = "1.0.145"}
 tracing={version = "0.1.41"}
 tracing-subscriber={version = "0.3.20"}
 tower-http={version = "0.6.6"}
 cfonts={version = "1.3.0"}
+toasty={git = "https://github.com/tokio-rs/toasty.git"}
+wasmtime={version = "38.0.3"}
+wasmtime-wasi={version = "38.0.3"}
+wasmtime-wasi-http={version = "38.0.3"}
+url={version = "2.5.7"}
+hyper={version = "1.7.0"}
+http-body-util={version = "0.1.0"}
+tower={version = "0.5.2"}
+hyper-util={version = "0.1.17"}
+walkdir = {version = "2.5.0"}

@@ -1,0 +1,27 @@
+package jimo:plugin;
+world plugin {
+    import routers;
+    export info;
+    export management-hanlder;
+    export request-handler;
+}
+interface info{
+    name:func()->string;
+}
+interface management-hanlder {
+    init: func() -> result<_, string>;
+    start: func() -> result<_, string>;
+    stop: func() -> result<_, string>;
+    cleanup: func() -> result<_, string>;
+}
+interface routers {
+    register: func(method: string, path: string) -> result<_, string>;
+    unregister: func(method: string, path: string) -> result<_, string>;
+}
+interface request-handler {
+    use wasi:http/types@0.2.6.{incoming-request,response-outparam};
+    handle: func(
+        request: incoming-request,
+        response-out: response-outparam
+    );
+}

@@ -3,4 +3,21 @@ name = "jimo-plugin"
 version = "0.1.0"
 edition = "2024"
 
+[package.metadata.component.target.dependencies]
+"wasi:http" = { path = "wit/deps/http" }
+
 [dependencies]
+dashmap={workspace = true}
+wasmtime={workspace = true}
+wasmtime-wasi={workspace = true}
+wasmtime-wasi-http={workspace = true}
+jimo-ctx={path = "../jimo-ctx"}
+jimo-conf={path = "../jimo-conf"}
+url={workspace = true}
+anyhow={workspace = true}
+tokio={workspace = true}
+hyper={workspace = true}
+http-body-util={workspace = true}
+serde={workspace = true,features = ["derive"]}
+axum={workspace = true}
+walkdir = {workspace = true}
