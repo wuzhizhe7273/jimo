@@ -1,0 +1,16 @@
+[package]
+name = "jimo"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+members = ["jimo-domain","jimo-application","jimo-adapter","jimo-infrastructure"]
+[workspace.dependencies]
+serde={version = "1.0.228"}
+futures={version = "0.3.32"}
+anyhow={version = "1.0.102"}
+thiserror={version = "2.0.18"}
+ulid={version = "1.2.1"}
+url={version = "2.5.8"}
+serde_json={version = "1.0.149"}
+[dependencies]

@@ -1,0 +1,12 @@
+[package]
+name = "jimo-application"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+jimo-domain={path = "../jimo-domain"}
+thiserror={workspace = true}
+anyhow={workspace = true}
+serde_json={workspace = true}
+ulid={workspace = true}
+url={workspace = true}
