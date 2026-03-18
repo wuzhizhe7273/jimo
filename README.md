@@ -13,6 +13,8 @@ Jimo 是一个采用 DDD 架构风格构建的 Rust 项目，旨在提供一种�
 - **Serde** - 序列化/反序列化框架
 - **Anyhow** - 错误处理
 - **Futures** - 异步编程
+- **Ulid** - 唯一ID生成
+- **Thiserror** - 错误定义
 
 ## 项目结构
 
@@ -30,7 +32,11 @@ jimo/
 │       │   ├── role/        # 角色聚合
 │       │   └── perm/        # 权限聚合
 │       ├── projection/      # 投影查询
-│       └── common/          # 公共组件
+│       │   ├── post/       # 文章投影
+│       │   └── user/       # 用户投影
+│       └── common/         # 公共组件
+│           ├── aggregate/  # 聚合根基础 trait
+│           └── projection/  # 投影基础 trait
 ├── jimo-application/        # 应用层 - 用例编排
 │   └── src/
 │       └── usecase/
@@ -38,7 +44,7 @@ jimo/
 │           ├── taxonomy/    # 分类用例
 │           └── iam/         # 身份认证用例
 ├── jimo-adapter/            # 适配器层 - 接口定义
-├── jimo-infrastructure/    # 基础设施层 - 外部服务集成
+├── jimo-infrastructure/     # 基础设施层 - 外部服务集成
 ├── Cargo.toml               # 工作区配置
 └── Cargo.lock               # 依赖锁定文件
 ```
@@ -47,19 +53,65 @@ jimo/
 
 ### 领域层 (jimo-domain)
 
-领域层是项目的核心，包含所有的业务实体、业务规则和领域服务。主要包括：
+领域层是项目的核心，包含所有的业务实体、业务规则和领域服务。
 
-- **聚合根 (Aggregate Root)**: 每个聚合根管理一组相关的实体，确保业务一致性
-  - User: 用户管理
-  - Post: 文章/内容管理
-  - Taxonomy: 分类体系
-  - Tag: 标签管理
-  - Role: 角色管理
-  - Permission: 权限管理
+#### 聚合根 (Aggregate Root)
 
-- **投影 (Projection)**: 用于查询的领域模型，包括 inline、multi 等类型
+每个聚合根管理一组相关的实体，确保业务一致性：
 
-- **公共组件**: 包括事件处理、快照机制、仓储接口等
+| 聚合 | 说明 |
+|------|------|
+| User | 用户管理 |
+| UserProfile | 用户资料管理 |
+| Post | 文章/内容管理 |
+| Taxonomy | 分类体系 |
+| Tag | 标签管理 |
+| Role | 角色管理 |
+| Perm | 权限管理 |
+
+#### SearchKey 模式
+
+所有聚合根采用统一的 SearchKey 模式进行查询：
+
+```rust
+// 唯一键定义
+pub enum UniqueKey {
+    Username(String),
+    Email(String),
+}
+
+// 查询键定义
+pub enum SearchKey {
+    Unique(UniqueKey),
+}
+
+impl aggregate::SearchKey for SearchKey {
+    fn unique(&self) -> bool {
+        match self {
+            Self::Unique(..) => true,
+        }
+    }
+}
+
+// Aggregate 实现
+impl Aggregate for User {
+    type ID = Ulid;
+    type Event = Event;
+    type SearchKey = SearchKey;
+}
+```
+
+#### 投影 (Projection)
+
+用于查询的领域模型，采用相同的 SearchKey 模式：
+
+```rust
+// MultiProjection trait
+pub trait MultiProjection: Projection {
+    type UniqueKey;
+    type SearchKey: aggregate::SearchKey;
+}
+```
 
 ### 应用层 (jimo-application)
 
@@ -81,7 +133,7 @@ jimo/
 
 ### 环境要求
 
-- Rust 1.75+
+- Rust 1.85+ (需要 nightly 特性)
 - Cargo
 
 ### 构建项目
@@ -95,11 +147,58 @@ cargo run
 
 # 运行测试
 cargo test
+
+# 代码检查
+cargo check --workspace
+
+# 代码格式化
+cargo fmt
 ```
 
 ### 添加依赖
 
 在 `Cargo.toml` 的 `[workspace.dependencies]` 中添加共享依赖，或在各个 crate 的 `[dependencies]` 中添加特定依赖。
+
+## 核心 trait
+
+### Aggregate
+
+```rust
+pub trait Aggregate: Clone {
+    type ID: Clone + Debug + ToString + Send + Sync;
+    type Event: Event;
+    type UniqueKey = ();
+    type SearchKey = ();
+
+    fn id(&self) -> &Self::ID;
+}
+```
+
+### SearchKey
+
+```rust
+pub trait SearchKey {
+    fn unique(&self) -> bool;
+}
+```
+
+### Projection
+
+```rust
+pub trait Projection {
+    type ID;
+    fn id(&self) -> &Self::ID;
+}
+```
+
+### MultiProjection
+
+```rust
+pub trait MultiProjection: Projection {
+    type UniqueKey;
+    type SearchKey: aggregate::SearchKey;
+}
+```
 
 ## 贡献指南
 
